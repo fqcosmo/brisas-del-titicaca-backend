@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model permisos {
+  id             Int              @id @default(autoincrement())
+  nombre         String?          @db.VarChar(255)
+  permisos_roles permisos_roles[]
+}
+
+model permisos_roles {
+  id        Int       @id @default(autoincrement())
+  idRol     Int?
+  idPermiso Int?
+  permiso   permisos? @relation(fields: [idPermiso], references: [id])
+  rol       roles?    @relation(fields: [idRol], references: [id])
+
+  @@unique([idRol, idPermiso])
+  @@index([idPermiso], map: "permisos_roles_idPermiso_fkey")
+}
+
+model roles {
+  id             Int              @id @default(autoincrement())
+  nombre         String?          @db.VarChar(45)
+  permisos_roles permisos_roles[]
+  usuarios_roles usuarios_roles[]
+}
+
+model user {
+  username       String           @db.VarChar(16)
+  email          String?          @db.VarChar(255)
+  password       String           @db.VarChar(255)
+  create_time    DateTime?        @default(now()) @db.Timestamp(0)
+  dni            String?          @db.VarChar(45)
+  id             Int              @id @default(autoincrement())
+  usuarios_roles usuarios_roles[]
+}
+
+model usuarios_roles {
+  id        Int    @id @default(autoincrement())
+  idUsuario Int?
+  idRol     Int?
+  rol       roles? @relation(fields: [idRol], references: [id])
+  usuario   user?  @relation(fields: [idUsuario], references: [id])
+
+  @@unique([idUsuario, idRol])
+  @@index([idRol], map: "usuarios_roles_idRol_fkey")
+}
